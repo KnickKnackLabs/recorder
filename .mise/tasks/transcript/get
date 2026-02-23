@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE description="Get transcript for a specific recording (JSON)"
+#USAGE arg "<title>" help="Recording title (e.g., 'Feb 18 at 15:10')"
+set -eo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT="$SCRIPT_DIR/../../scripts/get-transcript.mjs"
+
+shimmer browser:run "$SCRIPT" -- "${usage_title}"

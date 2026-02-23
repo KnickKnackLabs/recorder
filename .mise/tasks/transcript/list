@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="List all recordings with metadata (JSON)"
+set -eo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT="$SCRIPT_DIR/../../scripts/list-recordings.mjs"
+
+shimmer browser:run "$SCRIPT"
