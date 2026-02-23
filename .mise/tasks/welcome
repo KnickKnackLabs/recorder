@@ -25,8 +25,20 @@ echo ""
 if [ -n "$AGENT" ]; then
   AUTH_FILE="$HOME/.config/shimmer/browser/$AGENT/recorder.google.com.json"
   if [ -f "$AUTH_FILE" ]; then
-    AUTH_AGE=$(( ( $(date +%s) - $(stat -f %m "$AUTH_FILE" 2>/dev/null || stat -c %Y "$AUTH_FILE" 2>/dev/null) ) / 3600 ))
-    printf "  %-12s ✓ authenticated (session %dh old)\n" "Auth" "$AUTH_AGE"
+    AUTH_AGE_SECS=$(( $(date +%s) - $(stat -f %m "$AUTH_FILE" 2>/dev/null || stat -c %Y "$AUTH_FILE" 2>/dev/null) ))
+    AUTH_AGE_MINS=$(( AUTH_AGE_SECS / 60 ))
+    AUTH_AGE_HRS=$(( AUTH_AGE_SECS / 3600 ))
+    AUTH_AGE_DAYS=$(( AUTH_AGE_SECS / 86400 ))
+    if [ "$AUTH_AGE_MINS" -lt 1 ]; then
+      AUTH_AGE_STR="moments ago"
+    elif [ "$AUTH_AGE_HRS" -lt 1 ]; then
+      AUTH_AGE_STR="${AUTH_AGE_MINS}m ago"
+    elif [ "$AUTH_AGE_DAYS" -lt 1 ]; then
+      AUTH_AGE_STR="${AUTH_AGE_HRS}h ago"
+    else
+      AUTH_AGE_STR="${AUTH_AGE_DAYS}d ago"
+    fi
+    printf "  %-12s ✓ authenticated (last used %s)\n" "Auth" "$AUTH_AGE_STR"
   else
     printf "  %-12s ✗ not logged in → shimmer browser:login recorder.google.com\n" "Auth"
   fi
