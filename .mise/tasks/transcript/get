@@ -4,6 +4,6 @@
 set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT="$SCRIPT_DIR/../../scripts/get-transcript.mjs"
+SCRIPT="$SCRIPT_DIR/../../../scripts/get-transcript.mjs"
 
 shimmer browser:run "$SCRIPT" -- "${usage_title}"
