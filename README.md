@@ -2,7 +2,7 @@
 
 Tooling for extracting transcripts from [Google Recorder](https://recorder.google.com) via browser automation.
 
-Google Recorder has no API. This tool uses [shimmer](https://github.com/ricon-family/shimmer)'s browser infrastructure to navigate the app's Shadow DOM and extract recording metadata and transcripts.
+Google Recorder has no API. This tool uses [shimmer](https://github.com/KnickKnackLabs/shimmer)'s browser infrastructure to navigate the app's Shadow DOM and extract recording metadata and transcripts.
 
 ## Installation
 
@@ -18,7 +18,7 @@ shiv install recorder /path/to/recorder
 
 ## Prerequisites
 
-- [shimmer](https://github.com/ricon-family/shimmer) must be installed and accessible
+- [shimmer](https://github.com/KnickKnackLabs/shimmer) must be installed and accessible
 - Browser auth for recorder.google.com must be set up: `shimmer browser:login recorder.google.com`
 
 ## Usage
