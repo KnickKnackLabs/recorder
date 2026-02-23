@@ -1,9 +1,27 @@
 #!/usr/bin/env bash
-#MISE description="Get transcript for a specific recording (JSON)"
+#MISE description="Get transcript for a specific recording"
 #USAGE arg "<title>" help="Recording title (e.g., 'Feb 18 at 15:10')"
+#USAGE flag "--json" help="Output raw JSON instead of formatted text"
 set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT="$SCRIPT_DIR/../../../scripts/get-transcript.mjs"
 
-shimmer browser:run "$SCRIPT" -- "${usage_title}"
+OUTPUT=$(shimmer browser:run "$SCRIPT" -- "${usage_title}" 2>/dev/null | grep '^{')
+
+if [ -z "$OUTPUT" ]; then
+  echo "Failed to extract transcript." >&2
+  exit 1
+fi
+
+if [ "${usage_json}" = "true" ]; then
+  echo "$OUTPUT"
+else
+  TITLE=$(echo "$OUTPUT" | jq -r '.title')
+  echo ""
+  echo "  $TITLE"
+  echo "  ─────────────────────────────────────────"
+  echo ""
+  echo "$OUTPUT" | jq -r '.utterances[] | "  [\(.time)]  \(.text)"'
+  echo ""
+fi

@@ -1,8 +1,25 @@
 #!/usr/bin/env bash
-#MISE description="List all recordings with metadata (JSON)"
+#MISE description="List all recordings with metadata"
+#USAGE flag "--json" help="Output raw JSON instead of formatted table"
 set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT="$SCRIPT_DIR/../../../scripts/list-recordings.mjs"
 
-shimmer browser:run "$SCRIPT"
+OUTPUT=$(shimmer browser:run "$SCRIPT" 2>/dev/null | grep '^\[')
+
+if [ -z "$OUTPUT" ]; then
+  echo "No recordings found (or failed to fetch)." >&2
+  exit 1
+fi
+
+if [ "${usage_json}" = "true" ]; then
+  echo "$OUTPUT"
+else
+  COUNT=$(echo "$OUTPUT" | jq 'length')
+  echo ""
+  echo "  Recordings ($COUNT):"
+  echo ""
+  echo "$OUTPUT" | jq -r '.[] | "    \(.title)  (\(.duration))  \(.location)"'
+  echo ""
+fi

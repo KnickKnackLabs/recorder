@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+#MISE description="Recorder status and recent recordings"
+set -eo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+LIST_SCRIPT="$REPO_DIR/scripts/list-recordings.mjs"
+
+# Determine agent
+if [ -n "$GIT_AUTHOR_EMAIL" ]; then
+  AGENT=$(echo "$GIT_AUTHOR_EMAIL" | sed 's/@ricon\.family$//')
+elif git config user.email 2>/dev/null | grep -q '@ricon.family'; then
+  AGENT=$(git config user.email | sed 's/@ricon\.family$//')
+else
+  AGENT=""
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  Recorder"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Auth status
+if [ -n "$AGENT" ]; then
+  AUTH_FILE="$HOME/.config/shimmer/browser/$AGENT/recorder.google.com.json"
+  if [ -f "$AUTH_FILE" ]; then
+    AUTH_AGE=$(( ( $(date +%s) - $(stat -f %m "$AUTH_FILE" 2>/dev/null || stat -c %Y "$AUTH_FILE" 2>/dev/null) ) / 3600 ))
+    printf "  %-12s ✓ authenticated (session %dh old)\n" "Auth" "$AUTH_AGE"
+  else
+    printf "  %-12s ✗ not logged in → shimmer browser:login recorder.google.com\n" "Auth"
+  fi
+else
+  printf "  %-12s ? set identity first\n" "Auth"
+fi
+
+# Try to list recent recordings
+echo ""
+
+if [ -n "$AGENT" ] && [ -f "$AUTH_FILE" ]; then
+  RECORDINGS=$(shimmer browser:run "$LIST_SCRIPT" 2>/dev/null | grep '^\[')
+
+  if [ -n "$RECORDINGS" ]; then
+    COUNT=$(echo "$RECORDINGS" | jq 'length')
+    echo "  Recent recordings ($COUNT total):"
+    echo ""
+
+    echo "$RECORDINGS" | jq -r '.[:10][] | "    \(.title)  (\(.duration))  \(.location)"'
+
+    if [ "$COUNT" -gt 10 ]; then
+      echo ""
+      echo "    ... and $((COUNT - 10)) more"
+    fi
+  else
+    echo "  No recordings found (or failed to fetch)."
+  fi
+else
+  echo "  Log in to see recordings."
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "  recorder transcript:list            List all recordings"
+echo "  recorder transcript:get <title>     Get a transcript"
+echo ""

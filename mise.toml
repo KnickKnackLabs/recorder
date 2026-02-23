@@ -1,2 +1,5 @@
+[tools]
+jq = "latest"
+
 [tasks]
 # Tasks are defined in .mise/tasks/
