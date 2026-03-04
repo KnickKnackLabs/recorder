@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#MISE description="Browse recordings interactively"
+set -eo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export RECORDER_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+SCRIPTS="$RECORDER_ROOT/scripts"
+
+# Ensure cache directory exists
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/recorder"
+mkdir -p "$CACHE_DIR/transcripts" "$CACHE_DIR/audio"
+
+# Clean up playback on exit
+cleanup() {
+  local pidfile="$CACHE_DIR/.playback_pid"
+  if [ -f "$pidfile" ]; then
+    local pid
+    pid=$(head -1 "$pidfile")
+    kill "$pid" 2>/dev/null || true
+    rm -f "$pidfile"
+  fi
+}
+trap cleanup EXIT
+
+# Launch fzf
+"$SCRIPTS/browse-list.sh" | fzf \
+  --delimiter=$'\t' \
+  --with-nth='1..' \
+  --preview="$SCRIPTS/browse-preview.sh {1}" \
+  --preview-window='right,60%,wrap,border-left' \
+  --preview-label=' Transcript ' \
+  --header='ctrl-p: play/pause | ctrl-s: stop | ctrl-d: download | ctrl-r: refresh' \
+  --bind="ctrl-p:execute-silent($SCRIPTS/browse-play.sh {1} &)" \
+  --bind="ctrl-s:execute-silent($SCRIPTS/browse-stop.sh)" \
+  --bind="ctrl-d:execute($SCRIPTS/browse-download.sh {1})" \
+  --bind="ctrl-r:reload($SCRIPTS/browse-list.sh --refresh)" \
+  --border=rounded \
+  --border-label=' Recorder ' \
+  --no-sort \
+  --ansi \
+  --layout=reverse

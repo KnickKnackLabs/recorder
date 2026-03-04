@@ -73,6 +73,7 @@ else
 fi
 
 echo ""
+echo "  recorder browse                      Browse recordings interactively"
 echo "  recorder transcript:list            List all recordings"
 echo "  recorder transcript:get <title>     Get a transcript"
 echo "  recorder recording:get <title>      Download audio file (.m4a)"
