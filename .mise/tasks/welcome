@@ -75,4 +75,5 @@ fi
 echo ""
 echo "  recorder transcript:list            List all recordings"
 echo "  recorder transcript:get <title>     Get a transcript"
+echo "  recorder recording:get <title>      Download audio file (.m4a)"
 echo ""
