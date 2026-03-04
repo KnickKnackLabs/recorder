@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#MISE description="Clear cached recordings, transcripts, and audio"
+set -eo pipefail
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/recorder"
+
+if [ ! -d "$CACHE_DIR" ]; then
+  echo "No cache to clear."
+  exit 0
+fi
+
+echo "Clearing cache: $CACHE_DIR"
+rm -rf "$CACHE_DIR"
+echo "Done."
