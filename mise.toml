@@ -1,5 +1,7 @@
 [tools]
 jq = "latest"
+gum = "latest"
+fzf = "latest"
 
 [tasks]
 # Tasks are defined in .mise/tasks/
