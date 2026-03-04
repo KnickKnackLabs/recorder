@@ -22,17 +22,20 @@ cleanup() {
 }
 trap cleanup EXIT
 
+HEADER=$("$SCRIPTS/browse-status.sh")
+
 # Launch fzf
 "$SCRIPTS/browse-list.sh" | fzf \
   --delimiter=$'\t' \
   --with-nth='1..' \
   --preview="$SCRIPTS/browse-preview.sh {1}" \
   --preview-window='right,60%,wrap,border-left' \
-  --preview-label=' Transcript ' \
-  --header='ctrl-p: play/pause | ctrl-s: stop | ctrl-d: download | ctrl-r: refresh' \
-  --bind="ctrl-p:execute-silent($SCRIPTS/browse-play.sh {1} &)" \
-  --bind="ctrl-s:execute-silent($SCRIPTS/browse-stop.sh)" \
-  --bind="ctrl-d:execute($SCRIPTS/browse-download.sh {1})" \
+  --preview-label=' Details ' \
+  --header="$HEADER" \
+  --bind="ctrl-t:execute-silent($SCRIPTS/browse-fetch-transcript.sh {1})+refresh-preview" \
+  --bind="ctrl-p:execute-silent($SCRIPTS/browse-play.sh {1})+refresh-preview+transform-header($SCRIPTS/browse-status.sh)" \
+  --bind="ctrl-s:execute-silent($SCRIPTS/browse-stop.sh)+refresh-preview+transform-header($SCRIPTS/browse-status.sh)" \
+  --bind="ctrl-d:execute($SCRIPTS/browse-download.sh {1})+refresh-preview" \
   --bind="ctrl-r:reload($SCRIPTS/browse-list.sh --refresh)" \
   --border=rounded \
   --border-label=' Recorder ' \
