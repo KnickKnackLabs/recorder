@@ -16,10 +16,8 @@ fi
 if [ "${usage_json}" = "true" ]; then
   echo "$OUTPUT"
 else
-  COUNT=$(echo "$OUTPUT" | jq 'length')
-  echo ""
-  echo "  Recordings ($COUNT):"
-  echo ""
-  echo "$OUTPUT" | jq -r '.[] | "    \(.title)  (\(.duration))  \(.location)"'
-  echo ""
+  {
+    printf "Title\tDuration\tLocation\n"
+    echo "$OUTPUT" | jq -r '.[] | "\(.title)\t\(.duration)\t\(.location)"'
+  } | gum table --print -s "$(printf '\t')" --border rounded
 fi
