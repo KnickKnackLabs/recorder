@@ -39,14 +39,4 @@ if [ -f "$PIDFILE" ]; then
   fi
 fi
 
-# Download if needed (this is the slow part)
-SAFE=$(sanitize_title "$TITLE")
-AUDIO_CACHE="$(cache_dir)/audio/${SAFE}.m4a"
-if [ ! -f "$AUDIO_CACHE" ]; then
-  echo "Downloading audio for: $TITLE"
-  echo ""
-  cached_audio "$TITLE" > /dev/null
-  echo "Done."
-fi
-
 start_playback

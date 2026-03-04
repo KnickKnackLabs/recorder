@@ -9,14 +9,7 @@ SAFE=$(sanitize_title "$TITLE")
 CACHE_FILE="$(cache_dir)/transcripts/${SAFE}.json"
 
 # Already cached
-if [ -f "$CACHE_FILE" ]; then
-  echo "Transcript already cached."
-  sleep 1
-  exit 0
-fi
+[ -f "$CACHE_FILE" ] && exit 0
 
-echo "Fetching transcript for: $TITLE"
-echo ""
+# Fetch
 cached_transcript "$TITLE" > /dev/null
-echo "Done."
-sleep 1
