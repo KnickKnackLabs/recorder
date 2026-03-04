@@ -6,18 +6,17 @@ TITLE="$1"
 [ -z "$TITLE" ] && exit 0
 
 SAFE=$(sanitize_title "$TITLE")
-CACHE_DIR=$(cache_dir)
-CACHE_FILE="$CACHE_DIR/transcripts/${SAFE}.json"
-LOADING_FILE="$CACHE_DIR/transcripts/${SAFE}.loading"
+CACHE_FILE="$(cache_dir)/transcripts/${SAFE}.json"
 
-# Already cached — nothing to do
-[ -f "$CACHE_FILE" ] && exit 0
+# Already cached
+if [ -f "$CACHE_FILE" ]; then
+  echo "Transcript already cached."
+  sleep 1
+  exit 0
+fi
 
-# Mark as loading
-touch "$LOADING_FILE"
-
-# Fetch (slow)
+echo "Fetching transcript for: $TITLE"
+echo ""
 cached_transcript "$TITLE" > /dev/null
-
-# Clean up marker
-rm -f "$LOADING_FILE"
+echo "Done."
+sleep 1

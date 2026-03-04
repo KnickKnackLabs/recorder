@@ -29,13 +29,10 @@ echo ""
 
 # Transcript section
 TRANSCRIPT_CACHE="$CACHE_DIR/transcripts/${SAFE}.json"
-TRANSCRIPT_LOADING="$CACHE_DIR/transcripts/${SAFE}.loading"
 echo "  Transcript"
 echo "  ─────────────────────────────────────────"
 if [ -f "$TRANSCRIPT_CACHE" ]; then
   jq -r '.utterances[] | "  [\(.time)]  \(.text)"' "$TRANSCRIPT_CACHE"
-elif [ -f "$TRANSCRIPT_LOADING" ]; then
-  echo "  Loading transcript..."
 else
   echo "  Press ctrl-t to load"
 fi
@@ -43,14 +40,11 @@ echo ""
 
 # Audio section
 AUDIO_CACHE="$CACHE_DIR/audio/${SAFE}.m4a"
-AUDIO_LOADING="$CACHE_DIR/audio/${SAFE}.loading"
 echo "  Audio"
 echo "  ─────────────────────────────────────────"
 if [ -f "$AUDIO_CACHE" ]; then
   SIZE=$(du -h "$AUDIO_CACHE" | cut -f1 | tr -d ' ')
   echo "  Cached ($SIZE) — press ctrl-p to play"
-elif [ -f "$AUDIO_LOADING" ]; then
-  echo "  Downloading audio..."
 else
   echo "  Press ctrl-p to download and play"
 fi

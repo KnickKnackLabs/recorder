@@ -15,20 +15,8 @@ stop_playback() {
 }
 
 start_playback() {
-  local safe=$(sanitize_title "$TITLE")
-  local cache_d=$(cache_dir)
-  local loading_file="$cache_d/audio/${safe}.loading"
-
-  # Mark as loading if not cached
-  if [ ! -f "$cache_d/audio/${safe}.m4a" ]; then
-    touch "$loading_file"
-  fi
-
   local audio
   audio=$(cached_audio "$TITLE")
-
-  rm -f "$loading_file"
-
   if [ -n "$audio" ] && [ -f "$audio" ]; then
     afplay "$audio" &
     printf '%s\n%s\n' "$!" "$TITLE" > "$PIDFILE"
@@ -45,12 +33,20 @@ if [ -f "$PIDFILE" ]; then
       exit 0
     else
       stop_playback
-      start_playback
-      exit 0
     fi
   else
     rm -f "$PIDFILE"
   fi
+fi
+
+# Download if needed (this is the slow part)
+SAFE=$(sanitize_title "$TITLE")
+AUDIO_CACHE="$(cache_dir)/audio/${SAFE}.m4a"
+if [ ! -f "$AUDIO_CACHE" ]; then
+  echo "Downloading audio for: $TITLE"
+  echo ""
+  cached_audio "$TITLE" > /dev/null
+  echo "Done."
 fi
 
 start_playback
