@@ -15,8 +15,20 @@ stop_playback() {
 }
 
 start_playback() {
+  local safe=$(sanitize_title "$TITLE")
+  local cache_d=$(cache_dir)
+  local loading_file="$cache_d/audio/${safe}.loading"
+
+  # Mark as loading if not cached
+  if [ ! -f "$cache_d/audio/${safe}.m4a" ]; then
+    touch "$loading_file"
+  fi
+
   local audio
   audio=$(cached_audio "$TITLE")
+
+  rm -f "$loading_file"
+
   if [ -n "$audio" ] && [ -f "$audio" ]; then
     afplay "$audio" &
     printf '%s\n%s\n' "$!" "$TITLE" > "$PIDFILE"
