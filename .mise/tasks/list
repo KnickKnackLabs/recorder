@@ -4,7 +4,7 @@
 set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT="$SCRIPT_DIR/../../../scripts/list-recordings.mjs"
+SCRIPT="$SCRIPT_DIR/../../scripts/list-recordings.mjs"
 
 OUTPUT=$(shimmer browser:run "$SCRIPT" 2>/dev/null | grep '^\[')
 

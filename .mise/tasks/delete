@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#MISE description="Delete one or more recordings from Google Recorder"
+#USAGE arg "<title>" help="Recording title(s) to delete" var=#true
+set -eo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT="$SCRIPT_DIR/../../scripts/delete-recordings.mjs"
+
+eval "TITLES=($usage_title)"
+
+OUTPUT=$(shimmer browser:run "$SCRIPT" -- "${TITLES[@]}" 2>/dev/null | grep '^\[')
+
+if [ -z "$OUTPUT" ]; then
+  echo "Failed to delete recordings." >&2
+  exit 1
+fi
+
+echo "$OUTPUT" | jq -r '.[] | if .error then "Error: \(.title) — \(.error)" else "Deleted: \(.title)" end'
