@@ -54,7 +54,11 @@ export default async function({ page, args }) {
 
       await page.waitForTimeout(2000);
 
-      results.push({ title, deleted });
+      if (!deleted) {
+        results.push({ title, error: 'confirm button not found' });
+      } else {
+        results.push({ title, deleted });
+      }
     } catch (err) {
       results.push({ title, error: err.message });
     }
