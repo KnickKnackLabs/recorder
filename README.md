@@ -1,8 +1,8 @@
 # recorder
 
-Tooling for extracting transcripts from [Google Recorder](https://recorder.google.com) via browser automation.
+Tooling for extracting audio recordings from [Google Recorder](https://recorder.google.com) via browser automation.
 
-Google Recorder has no API. This tool uses [shimmer](https://github.com/KnickKnackLabs/shimmer)'s browser infrastructure to navigate the app's Shadow DOM and extract recording metadata and transcripts.
+Google Recorder has no API. This tool uses [shimmer](https://github.com/KnickKnackLabs/shimmer)'s browser infrastructure to navigate the app's Shadow DOM and extract recordings.
 
 ## Installation
 
@@ -24,14 +24,17 @@ shiv install recorder /path/to/recorder
 ## Usage
 
 ```bash
-# List all recordings with metadata
-recorder transcript:list
+# List all recordings
+recorder list
+recorder list --json
 
-# Get the transcript for a specific recording
-recorder transcript:get "Feb 18 at 15:10"
+# Download audio for one or more recordings
+recorder download "Feb 18 at 15:10"
+recorder download "Feb 18 at 15:10" "Feb 19 at 09:30" -o ~/recordings/
+
+# Delete recordings after processing
+recorder delete "Feb 18 at 15:10" "Feb 19 at 09:30"
 ```
-
-Both commands output JSON to stdout.
 
 ## Architecture
 
@@ -42,10 +45,19 @@ Patchright (the browser engine) is shimmer's dependency, not recorder's.
 ```
 recorder/
 ├── mise.toml
-├── .mise/tasks/transcript/
+├── .mise/tasks/
 │   ├── list
-│   └── get
+│   ├── download
+│   ├── delete
+│   └── welcome
 └── scripts/
     ├── list-recordings.mjs
-    └── get-transcript.mjs
+    ├── download-recordings.mjs
+    └── delete-recordings.mjs
 ```
+
+## Design notes
+
+Each command opens its own browser session — this keeps operations atomic and avoids session management complexity. `download` and `delete` accept multiple titles to batch work within a single session, so the typical agent workflow (list → download all → delete all) is exactly 3 browser launches regardless of recording count.
+
+A long-lived browser session approach was considered and may be worth revisiting if the 3-session overhead becomes a bottleneck. The main challenges would be session lifecycle management (is the browser alive? did auth expire?) and page state recovery (is the page in a clean state after each operation?).

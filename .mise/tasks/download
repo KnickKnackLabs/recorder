@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+#MISE description="Download audio files for one or more recordings"
+#USAGE arg "<title>" help="Recording title(s)" var=#true
+#USAGE flag "-o --output-dir <output_dir>" help="Output directory (default: current directory)"
+set -eo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT="$SCRIPT_DIR/../../scripts/download-recordings.mjs"
+
+eval "TITLES=($usage_title)"
+
+OUTPUT_DIR="$(cd "${usage_output_dir:-.}" && pwd)"
+
+ARGS=("--output-dir=${OUTPUT_DIR}")
+for title in "${TITLES[@]}"; do
+  ARGS+=("$title")
+done
+
+STDERR_FILE=$(mktemp)
+trap "rm -f $STDERR_FILE" EXIT
+
+OUTPUT=$(shimmer browser:run "$SCRIPT" -- "${ARGS[@]}" 2>"$STDERR_FILE" | grep '^\[') || true
+
+if [ -z "$OUTPUT" ]; then
+  echo "Failed to download recordings." >&2
+  if [ -s "$STDERR_FILE" ]; then
+    cat "$STDERR_FILE" >&2
+  fi
+  exit 1
+fi
+
+echo "$OUTPUT" | jq -r '.[] | if .error then "Error: \(.title) — \(.error)" else "Saved: \(.file)" end'
