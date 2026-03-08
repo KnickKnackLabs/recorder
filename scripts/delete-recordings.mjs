@@ -1,3 +1,5 @@
+import { selectRecording, openSettingsMenu } from './helpers.mjs';
+
 export const site = 'recorder.google.com';
 
 export default async function({ page, args }) {
@@ -14,30 +16,7 @@ export default async function({ page, args }) {
 
   for (const title of args) {
     try {
-      // Click the target recording in the sidebar
-      const found = await page.evaluate((t) => {
-        const main = document.querySelector('recorder-main');
-        if (!main?.shadowRoot) return false;
-
-        const sidebar = main.shadowRoot.querySelector('recorder-sidebar');
-        if (!sidebar?.shadowRoot) return false;
-
-        const sidebarItems = sidebar.shadowRoot.querySelector('recorder-sidebar-items');
-        if (!sidebarItems?.shadowRoot) return false;
-
-        const items = sidebarItems.shadowRoot.querySelectorAll('recorder-sidebar-item');
-        for (const item of items) {
-          const meta = item.shadowRoot?.querySelector('recorder-metadata');
-          if (!meta?.shadowRoot) continue;
-
-          const itemTitle = meta.shadowRoot.querySelector('.title')?.textContent?.trim();
-          if (itemTitle === t) {
-            item.click();
-            return true;
-          }
-        }
-        return false;
-      }, title);
+      const found = await selectRecording(page, title);
 
       if (!found) {
         results.push({ title, error: 'not found' });
@@ -46,14 +25,7 @@ export default async function({ page, args }) {
 
       await page.waitForTimeout(3000);
 
-      // Open the settings menu (three-dot icon)
-      await page.evaluate(() => {
-        const main = document.querySelector('recorder-main');
-        const content = main.shadowRoot.querySelector('recorder-content');
-        const settings = content.shadowRoot.querySelector('recorder-settings');
-        const menuBtn = settings.shadowRoot.querySelector('mwc-icon-button.menu');
-        if (menuBtn) menuBtn.click();
-      });
+      await openSettingsMenu(page);
 
       await page.waitForTimeout(1000);
 
