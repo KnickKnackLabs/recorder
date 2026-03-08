@@ -6,10 +6,16 @@ set -eo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT="$SCRIPT_DIR/../../scripts/list-recordings.mjs"
 
-OUTPUT=$(shimmer browser:run "$SCRIPT" 2>/dev/null | grep '^\[')
+STDERR_FILE=$(mktemp)
+trap "rm -f $STDERR_FILE" EXIT
+
+OUTPUT=$(shimmer browser:run "$SCRIPT" 2>"$STDERR_FILE" | grep '^\[') || true
 
 if [ -z "$OUTPUT" ]; then
   echo "No recordings found (or failed to fetch)." >&2
+  if [ -s "$STDERR_FILE" ]; then
+    cat "$STDERR_FILE" >&2
+  fi
   exit 1
 fi
 

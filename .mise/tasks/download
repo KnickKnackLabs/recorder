@@ -16,10 +16,16 @@ for title in "${TITLES[@]}"; do
   ARGS+=("$title")
 done
 
-OUTPUT=$(shimmer browser:run "$SCRIPT" -- "${ARGS[@]}" 2>/dev/null | grep '^\[')
+STDERR_FILE=$(mktemp)
+trap "rm -f $STDERR_FILE" EXIT
+
+OUTPUT=$(shimmer browser:run "$SCRIPT" -- "${ARGS[@]}" 2>"$STDERR_FILE" | grep '^\[') || true
 
 if [ -z "$OUTPUT" ]; then
   echo "Failed to download recordings." >&2
+  if [ -s "$STDERR_FILE" ]; then
+    cat "$STDERR_FILE" >&2
+  fi
   exit 1
 fi
 
