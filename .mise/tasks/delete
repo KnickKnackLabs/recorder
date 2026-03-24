@@ -6,7 +6,7 @@ set -eo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT="$SCRIPT_DIR/../../scripts/delete-recordings.mjs"
 
-read -ra TITLES <<< "${usage_title:-}"
+mapfile -t TITLES < <(xargs -n1 <<< "${usage_title:-}")
 
 STDERR_FILE=$(mktemp)
 trap "rm -f $STDERR_FILE" EXIT
